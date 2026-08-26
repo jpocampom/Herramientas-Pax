@@ -13,6 +13,9 @@
 set -euo pipefail
 
 VENV="${AGENT_REACH_VENV:-$HOME/.agent-reach-venv}"
+# Set de canales aprobado: solo plataformas occidentales. Excluye a proposito
+# bilibili, xiaohongshu, xiaoyuzhou, xueqiu y v2ex.
+AGENT_REACH_CHANNELS="${AGENT_REACH_CHANNELS:-twitter,reddit,linkedin}"
 SRC_REF="${AGENT_REACH_REF:-main}"
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
@@ -53,10 +56,17 @@ cat <<MSG
 
 Listo. Binario: $BINDIR/agent-reach  (agrega $BINDIR al PATH si hace falta)
 Estado de canales:  agent-reach doctor
-Canales opcionales: agent-reach install --env=auto --system --channels=<lista>
 
-Los canales que piden cookies (Twitter, Reddit, XHS, Facebook, Instagram,
-Xueqiu) requieren sesion de navegador. Usar cuenta secundaria, nunca la
-cuenta corporativa: la cookie da acceso total y las plataformas banean por
-trafico no-navegador.
+Canales aprobados para Pax (sin plataformas chinas):
+  agent-reach install --env=auto --system --channels=$AGENT_REACH_CHANNELS
+
+NO usar --channels=all: incluye Bilibili, Xiaohongshu, Xiaoyuzhou, Xueqiu y
+V2EX, que no aportan al flujo de deals y agregan binarios de terceros.
+Esos canales aparecen igual en 'doctor' como no instalados: el paquete tiene
+la lista de canales fija (agent_reach/channels/__init__.py, ALL_CHANNELS) y no
+expone un flag para ocultarlos. Mientras no se instalen, quedan inertes.
+
+Los canales que piden cookies (Twitter, Reddit, Facebook, Instagram) requieren
+sesion de navegador. Usar cuenta secundaria, nunca la cuenta corporativa: la
+cookie da acceso total y las plataformas banean por trafico no-navegador.
 MSG

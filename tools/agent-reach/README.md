@@ -42,10 +42,57 @@ Conclusión: Agent Reach sirve en una máquina con salida a internet abierta
 (laptop, VPS propio), no dentro de este sandbox salvo que se amplíe la política
 de egress del entorno.
 
+## Verificación de integridad (2026-08-26)
+
+Se comparó el zip `Agent-Reach-main` provisto contra la fuente clonada e
+instalada. Resultado: **idénticos, archivo por archivo.**
+
+| Comprobación | Resultado |
+|---|---|
+| Commit del clone instalado | `06c202b03400a7d31886bf4399213706da1a0324` (2026-08-25) |
+| Commit declarado en el zip | `06c202b03400a7d31886bf4399213706da1a0324` |
+| `diff -rq` zip vs. fuente clonada | sin diferencias |
+| `diff -rq` zip vs. `site-packages/agent_reach` | sin diferencias |
+| Versión | 1.5.0 en ambos |
+
+Es decir: el zip no aporta nada nuevo ni corrige el problema de red. La
+instalación está bien hecha; lo que no funciona es la salida a internet.
+
+## Canales: set aprobado
+
+Excluidas a propósito las plataformas de consumo chino: **Bilibili,
+Xiaohongshu, Xiaoyuzhou, V2EX y Xueqiu.** Ninguna está instalada — son canales
+opcionales que solo entran con `--system --channels=...`, y ese comando nunca
+se corrió.
+
+| Canal | Estado |
+|---|---|
+| Web (Jina), GitHub, RSS, Exa, YouTube | núcleo, sin credenciales |
+| Twitter/X, Reddit, LinkedIn | opcionales aprobados, requieren login |
+| Facebook, Instagram | opcionales, solo si hay Chrome con OpenCLI |
+| Bilibili, Xiaohongshu, Xiaoyuzhou, V2EX, Xueqiu | **excluidos** |
+
+```bash
+# Correcto:
+agent-reach install --env=auto --system --channels=twitter,reddit,linkedin
+# Nunca:
+agent-reach install --env=auto --system --channels=all   # arrastra los 5 chinos
+```
+
+Limitación: `ALL_CHANNELS` en `agent_reach/channels/__init__.py` es una lista
+fija y el paquete no expone un flag para ocultar canales. Los cinco excluidos
+van a seguir apareciendo en `agent-reach doctor` marcados como no instalados.
+Mientras no se instalen quedan inertes: no ejecutan red ni guardan credenciales.
+
+Nota: Xueqiu es el único del grupo que no es entretenimiento — es la comunidad
+bursátil china (cotizaciones + foros). Si alguna vez se miran comparables
+listados en Shanghái o Shenzhen, sería el único de los cinco que valdría
+reconsiderar.
+
 ## Riesgos antes de configurar canales
 
-- **Cookies = acceso total a la cuenta.** Twitter, Reddit, XHS, Facebook,
-  Instagram y Xueqiu se autentican con la cookie de sesión del navegador,
+- **Cookies = acceso total a la cuenta.** Twitter, Reddit, Facebook e
+  Instagram se autentican con la cookie de sesión del navegador,
   guardada en claro en `~/.agent-reach/`. Usar cuenta secundaria; nunca la
   cuenta corporativa ni un LinkedIn con red de contrapartes.
 - **Riesgo de baneo.** Las plataformas detectan tráfico no-navegador y
@@ -56,7 +103,7 @@ de egress del entorno.
   `AGENT_REACH_REF` si se quiere reproducibilidad.
 - **`--system` y `--channels=all`** instalan binarios de terceros adicionales
   (OpenCLI, rdt-cli, bili-cli, xiaohongshu-mcp) desde GitHub. Cada uno amplía la
-  superficie. Aprobar canal por canal, no en bloque.
+  superficie. Aprobar canal por canal, no en bloque; ver el set aprobado arriba.
 
 ## Comandos útiles
 
