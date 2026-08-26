@@ -58,6 +58,35 @@ instalada. Resultado: **idénticos, archivo por archivo.**
 Es decir: el zip no aporta nada nuevo ni corrige el problema de red. La
 instalación está bien hecha; lo que no funciona es la salida a internet.
 
+## Qué hace falta para que funcione en el entorno remoto
+
+La política de egress se define **en el entorno**, no dentro de la sesión: no
+se puede cambiar desde el contenedor. Esta sesión corre en el entorno
+`Review skills` (`env_01Udf8siXVm71fbBhmn5Qa2k`). Hay que editar su política
+de red en claude.ai/code (o crear un entorno propio para este repo) y abrir
+una sesión nueva; el contenedor actual no toma el cambio.
+
+Permitido hoy: `github.com`, `pypi.org`, `files.pythonhosted.org`,
+`registry.npmjs.org`, `api.anthropic.com`. Nada más.
+(`api.github.com` responde pero está limitado a los repos de la sesión, así
+que ni siquiera `gh` serviría para búsquedas generales.)
+
+Allowlist mínima para el set de canales aprobado:
+
+| Canal | Hosts |
+|---|---|
+| Web (Jina Reader) | `r.jina.ai` |
+| Exa Search | `mcp.exa.ai` |
+| YouTube | `youtube.com`, `googlevideo.com`, `ytimg.com` |
+| Twitter/X | `x.com`, `api.x.com`, `twitter.com` |
+| Reddit | `reddit.com`, `oauth.reddit.com` |
+| LinkedIn | `linkedin.com` |
+| RSS | los dominios de cada feed |
+
+Prueba que aísla la falla: contra un host permitido (`pypi.org/rss/updates.xml`)
+el canal RSS parsea 100 entradas sin error. El paquete funciona; lo que falla
+es exclusivamente la salida de red.
+
 ## Canales: set aprobado
 
 Excluidas a propósito las plataformas de consumo chino: **Bilibili,
