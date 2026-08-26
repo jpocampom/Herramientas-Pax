@@ -6,16 +6,45 @@ plataformas externas (web, YouTube, GitHub, RSS, Exa, Twitter/X, Reddit, XHS,
 Bilibili, Xueqiu, LinkedIn, Facebook, Instagram). No es un wrapper: instala las
 CLIs upstream y el agente las llama directo.
 
-## Instalación
+## Instalación en la laptop (macOS)
+
+Requisitos: Python >= 3.10 y git. Si `python3 --version` abre un diálogo de
+Xcode, corre `xcode-select --install` o instala `brew install python@3.12`.
+Para YouTube completo hace falta `brew install node`.
 
 ```bash
+git clone https://github.com/jpocampom/Herramientas-Pax.git
+cd Herramientas-Pax/tools/agent-reach
+
 ./install.sh              # instala + chequeo read-only (no toca el sistema)
-./install.sh --dry-run    # muestra qué haría --system
-./install.sh --system     # permite instalar dependencias de sistema (gh, mcporter)
+./verify.sh               # comprueba que los canales SÍ alcanzan la red
 ```
 
-Queda en `~/.agent-reach-venv`, con symlink en `~/.local/bin/agent-reach`.
-Config y tokens en `~/.agent-reach/`. Nada se escribe dentro de este repo.
+`verify.sh` es el paso que importa. `agent-reach doctor` reporta Web, RSS y
+YouTube como ✅ sin hacer una petición real — son falsos positivos.
+`verify.sh` sí pega a la red y distingue las dos fallas que doctor confunde:
+paquete mal instalado vs. host bloqueado. En un `[X] BLOQUEADO` con `000` el
+problema es la red (VPN, firewall corporativo, proxy), no la instalación:
+reinstalar no arregla nada.
+
+Si todo sale `[ok]`, recién ahí conviene sumar canales con credenciales:
+
+```bash
+./install.sh --dry-run    # preview de lo que haría --system
+./install.sh --system     # permite instalar dependencias de sistema
+agent-reach install --env=auto --system --channels=twitter,reddit,linkedin
+```
+
+Queda en `~/.agent-reach-venv`, con symlink en `~/.local/bin/agent-reach`
+(en macOS ese directorio no está en el `PATH` por defecto; el instalador te
+dice la línea exacta a agregar en `~/.zshrc`). Config y tokens en
+`~/.agent-reach/`. Nada se escribe dentro de este repo.
+
+### Desinstalar
+
+```bash
+rm -rf ~/.agent-reach-venv ~/.agent-reach ~/.local/bin/agent-reach ~/.local/bin/yt-dlp
+```
 
 ## Estado verificado en el contenedor remoto de Claude Code (2026-08-26)
 
